@@ -4,7 +4,19 @@ struct Home: View {
     var body: some View {
         NavigationView {
             VStack {
-                // Sección de saldo y barra superior
+                // Barra superior con imagen de fondo en lugar de color rojo
+                ZStack {
+                    Image("fondos") // Cambia "fondo" por el nombre de tu imagen
+                        .resizable()
+                        .scaledToFill()
+                        .frame(height: 100)  // Ajusta la altura de la barra de imagen
+                        .clipped()  // Recorta la imagen si es más grande que la vista
+                        .edgesIgnoringSafeArea(.top)
+                }
+                .frame(height: 100)  // Asegura que el espacio de la barra sea de 100 de alto
+
+                
+                // Sección de saldo y botón interactivo con Maya
                 VStack {
                     HStack {
                         Text("$43,752.53 MN")
@@ -18,7 +30,7 @@ struct Home: View {
                     HStack {
                         Image(systemName: "bolt.circle.fill")
                             .foregroundColor(.gray)
-                        Text("Interactua con ")
+                        Text("Interactúa con ")
                             .foregroundColor(.black) +
                         Text("Maya")
                             .foregroundColor(.red)
@@ -37,8 +49,8 @@ struct Home: View {
                     .shadow(radius: 5)
                     .padding([.leading, .trailing], 20)
                 }
-                .padding([.top], 50)
-                .background(Color.red.opacity(0.9))
+                .padding(.top, 10)  // Añade espacio superior a la sección del saldo y botón
+                .background(Color.white)  // Fondo blanco para esta sección
                 
                 // Sección de transacciones
                 VStack(alignment: .leading) {
@@ -53,29 +65,37 @@ struct Home: View {
                     TransactionRow(title: "Volkswagen", date: "10 OCT • 11:01 am", amount: "$615.12")
                 }
                 .padding([.top], 20)
+                .background(Color.white)  // Fondo blanco para la sección de transacciones
                 
                 Spacer()
                 
-                // Barra inferior de navegación
+                // Barra inferior de navegación con color #EF0B29
                 HStack {
                     NavigationButton(imageName: "creditcard", label: "Tarjeta")
                     Spacer()
-                    NavigationButton(imageName: "bolt.fill", label: "Maya")
+                    // Navigation Button Maya actualizado con NavigationLink a ChatScreen
+                    NavigationLink(destination: ChatScreen()) {
+                        NavigationButton(imageName: "bolt.fill", label: "Maya")
+                    }
+                    
                     Spacer()
-                    NavigationButton(imageName: "arrow.left.arrow.right", label: "Transferir")
+                    
+                    NavigationLink(destination: TransferScreen()) {
+                        NavigationButton(imageName: "arrow.left.arrow.right", label: "Transferir")
+                    }
+
                     Spacer()
                     NavigationButton(imageName: "rectangle.stack", label: "Servicios")
                 }
                 .padding()
-                .background(Color.red)
+                .background(Color(red: 0.937, green: 0.043, blue: 0.161)) // Color #EF0B29 en RGB
                 .foregroundColor(.white)
             }
+            .background(Color.white)  // Establece fondo blanco para toda la vista
             .navigationBarHidden(true)  // Oculta la barra de navegación superior
         }
     }
 }
-
-
 
 struct TransactionRow: View {
     let title: String
@@ -99,6 +119,7 @@ struct TransactionRow: View {
         }
         .padding([.leading, .trailing], 20)
         .padding([.top, .bottom], 10)
+        .background(Color.white)  // Fondo blanco para cada fila de transacciones
     }
 }
 

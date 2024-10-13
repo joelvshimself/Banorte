@@ -9,6 +9,9 @@ import SwiftUI
 
 @main
 struct BanorteApp: App {
+    // Vincula el AppDelegate con SwiftUI
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     var body: some Scene {
         WindowGroup {
             ContentView()
