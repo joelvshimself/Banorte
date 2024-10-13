@@ -1,21 +1,23 @@
-//
-//  ContentView.swift
-//  Banorte
-//
-//  Created by Joel Vargas on 12/10/24.
-//
-
 import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationView {
+            VStack {
+                Text("Pantalla principal")
+                    .font(.largeTitle)
+                    .padding()
+
+                NavigationLink(destination: SecondScreen()) {
+                    Text("Ir a la segunda pantalla")
+                        .font(.title2)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+            }
         }
-        .padding()
     }
 }
 
