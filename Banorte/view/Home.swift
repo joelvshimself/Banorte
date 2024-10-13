@@ -15,7 +15,6 @@ struct Home: View {
                 }
                 .frame(height: 100)  // Asegura que el espacio de la barra sea de 100 de alto
 
-                
                 // Sección de saldo y botón interactivo con Maya
                 VStack {
                     HStack {
@@ -59,6 +58,7 @@ struct Home: View {
                         .foregroundColor(.gray)
                         .padding([.leading, .top], 20)
                     
+                    // Usando TransactionRow
                     TransactionRow(title: "McDonald's", date: "10 OCT • 11:01 am", amount: "$615.12")
                     TransactionRow(title: "Transferencia a Santiago", date: "10 OCT • 11:01 am", amount: "$1302.97")
                     TransactionRow(title: "Pemex", date: "10 OCT • 11:01 am", amount: "$1012.38")
@@ -73,19 +73,17 @@ struct Home: View {
                 HStack {
                     NavigationButton(imageName: "creditcard", label: "Tarjeta")
                     Spacer()
-                    // Navigation Button Maya actualizado con NavigationLink a ChatScreen
                     NavigationLink(destination: ChatScreen()) {
                         NavigationButton(imageName: "bolt.fill", label: "Maya")
                     }
-                    
                     Spacer()
-                    
                     NavigationLink(destination: TransferScreen()) {
                         NavigationButton(imageName: "arrow.left.arrow.right", label: "Transferir")
                     }
-
                     Spacer()
-                    NavigationButton(imageName: "rectangle.stack", label: "Servicios")
+                    NavigationLink(destination: Services()) {
+                        NavigationButton(imageName: "rectangle.stack", label: "Servicios")
+                    }
                 }
                 .padding()
                 .background(Color(red: 0.937, green: 0.043, blue: 0.161)) // Color #EF0B29 en RGB
@@ -97,6 +95,7 @@ struct Home: View {
     }
 }
 
+// Definición de TransactionRow
 struct TransactionRow: View {
     let title: String
     let date: String
@@ -123,6 +122,7 @@ struct TransactionRow: View {
     }
 }
 
+// Definición de NavigationButton
 struct NavigationButton: View {
     let imageName: String
     let label: String
