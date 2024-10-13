@@ -11,7 +11,6 @@ Este proyecto es una aplicación móvil desarrollada en Swift utilizando SwiftUI
 - **Pantalla de Transferencia**
 - **Pantalla de Chat**
 - **Automatización de Inversiones**
-- **Autenticación con Firebase**
 - **Notificaciones en Tiempo Real**
 
 ## Estructura del Proyecto
