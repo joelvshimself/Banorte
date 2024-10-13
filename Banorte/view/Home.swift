@@ -1,24 +1,27 @@
 import SwiftUI
 
 struct Home: View {
+    @ObservedObject var saldoManager = SaldoManager.shared  // Observa el saldo de SaldoManager
+
     var body: some View {
         NavigationView {
             VStack {
-                // Barra superior con imagen de fondo en lugar de color rojo
+                // Barra superior con imagen de fondo
                 ZStack {
-                    Image("fondos") // Cambia "fondo" por el nombre de tu imagen
+                    Image("fondos")
                         .resizable()
                         .scaledToFill()
-                        .frame(height: 100)  // Ajusta la altura de la barra de imagen
-                        .clipped()  // Recorta la imagen si es más grande que la vista
+                        .frame(height: 100)
+                        .clipped()
                         .edgesIgnoringSafeArea(.top)
                 }
-                .frame(height: 100)  // Asegura que el espacio de la barra sea de 100 de alto
+                .frame(height: 100)
 
                 // Sección de saldo y botón interactivo con Maya
                 VStack {
                     HStack {
-                        Text("$43,752.53 MN")
+                        // Mostrar el saldo actual dinámicamente desde SaldoManager
+                        Text(String(format: "$%.2f MN", saldoManager.saldo))
                             .font(.system(size: 40, weight: .bold))
                             .foregroundColor(.black)
                         Spacer()
@@ -58,7 +61,6 @@ struct Home: View {
                         .foregroundColor(.gray)
                         .padding([.leading, .top], 20)
                     
-                    // Usando TransactionRow
                     TransactionRow(title: "McDonald's", date: "10 OCT • 11:01 am", amount: "$615.12")
                     TransactionRow(title: "Transferencia a Santiago", date: "10 OCT • 11:01 am", amount: "$1302.97")
                     TransactionRow(title: "Pemex", date: "10 OCT • 11:01 am", amount: "$1012.38")
@@ -68,8 +70,8 @@ struct Home: View {
                 .background(Color.white)  // Fondo blanco para la sección de transacciones
                 
                 Spacer()
-                
-                // Barra inferior de navegación con color #EF0B29
+
+                // Barra inferior de navegación
                 HStack {
                     NavigationButton(imageName: "creditcard", label: "Tarjeta")
                     Spacer()
@@ -86,14 +88,16 @@ struct Home: View {
                     }
                 }
                 .padding()
-                .background(Color(red: 0.937, green: 0.043, blue: 0.161)) // Color #EF0B29 en RGB
+                .background(Color(red: 0.937, green: 0.043, blue: 0.161))
                 .foregroundColor(.white)
             }
-            .background(Color.white)  // Establece fondo blanco para toda la vista
-            .navigationBarHidden(true)  // Oculta la barra de navegación superior
+            .background(Color.white)
+            .navigationBarBackButtonHidden(true)  // Esto oculta el botón "Back"
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 }
+
 
 // Definición de TransactionRow
 struct TransactionRow: View {
@@ -118,7 +122,7 @@ struct TransactionRow: View {
         }
         .padding([.leading, .trailing], 20)
         .padding([.top, .bottom], 10)
-        .background(Color.white)  // Fondo blanco para cada fila de transacciones
+        .background(Color.white)
     }
 }
 

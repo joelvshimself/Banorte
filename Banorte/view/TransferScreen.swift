@@ -98,15 +98,26 @@ struct TransferScreen: View {
 
                 // Barra inferior de navegación con color #EF0B29
                 HStack {
-                    TransferNavigationButton(imageName: "creditcard", label: "Tarjeta")
-                    Spacer()
-                    NavigationLink(destination: ChatScreen()) {
-                        TransferNavigationButton(imageName: "bolt.fill", label: "Maya")
+                    
+                    NavigationLink(destination: Home()) {
+                        NavigationButton(imageName: "house.fill", label: "Home")
                     }
                     Spacer()
-                    TransferNavigationButton(imageName: "arrow.left.arrow.right", label: "Transferir")
+                    // Navigation Button Maya actualizado con NavigationLink a ChatScreen
+                    NavigationLink(destination: ChatScreen()) {
+                        NavigationButton(imageName: "bolt.fill", label: "Maya")
+                    }
+                    
                     Spacer()
-                    TransferNavigationButton(imageName: "rectangle.stack", label: "Servicios")
+                    
+                    NavigationLink(destination: TransferScreen()) {
+                        NavigationButton(imageName: "arrow.left.arrow.right", label: "Transferir")
+                    }
+
+                    Spacer()
+                    NavigationLink(destination: Services()) {
+                        NavigationButton(imageName: "rectangle.stack", label: "Servicios")
+                    }
                 }
                 .padding()
                 .background(Color(red: 0.937, green: 0.043, blue: 0.161))
@@ -135,8 +146,9 @@ struct TransferScreen: View {
                     showAlert = true
                 }
             }
-            .navigationBarBackButtonHidden(true)  // Ocultar el botón de back
         }
+        .navigationBarBackButtonHidden(true)  // Esto oculta el botón "Back"
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

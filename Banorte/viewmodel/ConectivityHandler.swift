@@ -6,6 +6,7 @@ class ConnectivityHandler: NSObject, ObservableObject, MCSessionDelegate, MCNear
 
     private let peerID = MCPeerID(displayName: UIDevice.current.name)
     private let serviceType = "example-service"
+    @ObservedObject var saldoManager = SaldoManager.shared
     
     private var session: MCSession!
     private var advertiser: MCNearbyServiceAdvertiser!
@@ -15,8 +16,7 @@ class ConnectivityHandler: NSObject, ObservableObject, MCSessionDelegate, MCNear
     @Published var connectedPeerName = ""
     @Published var receivedMessages: [String] = []
     @Published var showConnectionAlert = false
-    @Published var saldoActual: Double = SaldoManager.shared.getSaldo()  // Estado del saldo actual
-    
+
     override init() {
         super.init()
         
@@ -40,14 +40,27 @@ class ConnectivityHandler: NSObject, ObservableObject, MCSessionDelegate, MCNear
         browser.startBrowsingForPeers()
     }
     
-    // Send message
     func sendMessage(_ message: String) {
         if session.connectedPeers.count > 0 {
             if let data = message.data(using: .utf8) {
-                try? session.send(data, toPeers: session.connectedPeers, with: .reliable)
+                if let cantidad = Int(message) {
+                    if SaldoManager.shared.saldo >= Double(cantidad) {
+                        SaldoManager.shared.afectarSaldo(cantidad: -Double(cantidad))
+                        try? session.send(data, toPeers: session.connectedPeers, with: .reliable)
+                        print("Nuevo saldo después de enviar \(cantidad): \(SaldoManager.shared.saldo)")
+                    } else {
+                        print("Saldo insuficiente para enviar \(cantidad).")
+                        // Aquí puedes agregar una alerta para el usuario
+                    }
+                } else {
+                    print("El mensaje a enviar no es un número válido.")
+                    // Puedes decidir si quieres enviar mensajes que no sean números
+                    try? session.send(data, toPeers: session.connectedPeers, with: .reliable)
+                }
             }
         }
     }
+
     
     // Disconnect from session and stop advertising and browsing
     func disconnect() {
@@ -86,20 +99,18 @@ class ConnectivityHandler: NSObject, ObservableObject, MCSessionDelegate, MCNear
                 
                 // Intentar parsear el mensaje a un entero
                 if let cantidad = Int(message) {
-                    // Llamar a la funcionalidad de afectar saldo
+                    // Llamar a la funcionalidad de afectar saldo en el singleton
                     SaldoManager.shared.afectarSaldo(cantidad: Double(cantidad))
                     
-                    // Actualizar el saldo actual
-                    self.saldoActual = SaldoManager.shared.getSaldo()
-                    
                     // Mostrar el nuevo saldo para depuración
-                    print("Nuevo saldo después de recibir \(cantidad): \(self.saldoActual)")
+                    print("Nuevo saldo después de recibir \(cantidad): \(SaldoManager.shared.saldo)")
                 } else {
                     print("El mensaje recibido no es un número válido.")
                 }
             }
         }
     }
+
     
     // Required delegate methods with no implementation needed for now
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {}

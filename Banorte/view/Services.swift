@@ -62,5 +62,7 @@ struct Services: View {
             Alert(title: Text("Connection Established"), message: Text("You are now connected to \(connectivityHandler.connectedPeerName)"), dismissButton: .default(Text("OK")))
         }
         .padding()
+        .navigationBarTitleDisplayMode(.inline)
     }
+        
 }

@@ -20,7 +20,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         SaldoManager.shared.setSaldo(1000.0)  // Establecer el saldo inicial en 1000
         
         // Opcional: Log de saldo inicial
-        print("Saldo inicial: \(SaldoManager.shared.getSaldo())")
+        
         
         return true
     }
