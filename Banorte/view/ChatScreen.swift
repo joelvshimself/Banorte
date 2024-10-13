@@ -1,15 +1,14 @@
 import SwiftUI
+import Combine
 
 struct ChatScreen: View {
-    @Environment(\.presentationMode) var presentationMode  // Permite regresar a la pantalla anterior
+    let transactions: [Transaction]
+    @Environment(\.presentationMode) var presentationMode
     @State private var messageText: String = ""
-    @State private var messages: [String] = [
-        "Actualmente tienes un balance de $4,752.91 MXN",
-        "Invierte 500 en NVIDIA cuando baje a 2500",
-        "Claro, necesito que escribas 'Confirmar'"
+    @State private var messages: [Message] = [
+        Message(text: "Hola, soy Maya. ¿En qué puedo ayudarte?", isUser: false)
     ]
-    @State private var userMessages: [String] = [] // Mensajes escritos por el usuario
-    @State private var dragOffset: CGFloat = 0  // Para gestionar el gesto de arrastre
+    @State private var dragOffset: CGFloat = 0
 
     // Obtener altura total de la pantalla
     let screenHeight = UIScreen.main.bounds.height
@@ -18,15 +17,15 @@ struct ChatScreen: View {
         VStack {
             // Título, ícono y botón de regreso con imagen de fondo
             ZStack {
-                Image("fondos") // Imagen de fondo en lugar de color rojo
+                Image("fondos")
                     .resizable()
                     .scaledToFill()
-                    .frame(height: 120 + screenHeight * 0.03)  // Ajusta la altura de la imagen extendiéndola un 3% más
-                    .clipped()  // Recorta la imagen si es más grande que el área
-                    .edgesIgnoringSafeArea(.top)  // Extiende el fondo hasta la parte superior de la pantalla
+                    .frame(height: 120 + screenHeight * 0.03)
+                    .clipped()
+                    .edgesIgnoringSafeArea(.top)
                 
                 HStack {
-                    // Botón de regresar al Main Screen
+                    // Botón de regresar
                     Button(action: {
                         presentationMode.wrappedValue.dismiss()
                     }) {
@@ -52,49 +51,45 @@ struct ChatScreen: View {
                 }
                 .padding()
             }
-            .frame(height: 120 + screenHeight * 0.03)  // Asegura que el área de la barra tenga la altura ajustada
-            .offset(y: -20)  // Mueve la barra superior ligeramente hacia arriba (ajusta el valor si es necesario)
+            .frame(height: 120 + screenHeight * 0.03)
+            .offset(y: -20)
             
             // Sección de mensajes
             ScrollViewReader { scrollViewProxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 10) {
-                        // Mensajes predefinidos del bot
                         ForEach(messages.indices, id: \.self) { index in
+                            let message = messages[index]
                             HStack {
-                                Image(systemName: "bolt.fill")
-                                    .foregroundColor(.gray)
-                                Text(messages[index])
-                                    .padding()
-                                    .background(Color(red: 0.937, green: 0.043, blue: 0.161))  // Color #EF0B29 aplicado
-                                    .cornerRadius(10)
-                                    .foregroundColor(.white)
-                                Spacer()
+                                if message.isUser {
+                                    Spacer()
+                                    Text(message.text)
+                                        .padding()
+                                        .background(Color.gray.opacity(0.2))
+                                        .cornerRadius(10)
+                                        .foregroundColor(.black)
+                                } else {
+                                    Image(systemName: "bolt.fill")
+                                        .foregroundColor(.gray)
+                                    Text(message.text)
+                                        .padding()
+                                        .background(Color(red: 0.937, green: 0.043, blue: 0.161))
+                                        .cornerRadius(10)
+                                        .foregroundColor(.white)
+                                    Spacer()
+                                }
                             }
                         }
-                        
-                        // Mensajes del usuario
-                        ForEach(userMessages.indices, id: \.self) { index in
-                            HStack {
-                                Spacer()
-                                Text(userMessages[index])
-                                    .padding()
-                                    .foregroundColor(.black) // Sin fondo, solo el texto
-                            }
-                        }
-                        // Ancla para desplazar el scroll hasta la parte inferior
                         .id("LastMessage")
                     }
                     .padding(.horizontal)
-                    .padding(.bottom, 20)  // Añade padding en la parte inferior para subir los textos ligeramente
+                    .padding(.bottom, 20)
                 }
-                .onChange(of: userMessages.count) {
-                    // Desplaza el scroll hasta el último mensaje cuando se agrega uno nuevo
+                .onChange(of: messages.count) { _ in
                     withAnimation {
                         scrollViewProxy.scrollTo("LastMessage", anchor: .bottom)
                     }
                 }
-
             }
             
             // Campo de entrada para enviar mensaje
@@ -105,13 +100,19 @@ struct ChatScreen: View {
                 
                 Button(action: {
                     if !messageText.isEmpty {
-                        userMessages.append(messageText)  // Agrega el mensaje del usuario
-                        messageText = ""  // Limpia el campo de texto
+                        // Agregar mensaje del usuario
+                        let userMessage = Message(text: messageText, isUser: true)
+                        messages.append(userMessage)
+                        
+                        // Enviar mensaje a la API de OpenAI
+                        sendMessageToGPT(message: messageText)
+                        
+                        messageText = ""
                     }
                 }) {
                     Image(systemName: "arrow.up.circle.fill")
                         .font(.system(size: 36))
-                        .foregroundColor(Color(red: 0.937, green: 0.043, blue: 0.161))  // Color #EF0B29 aplicado
+                        .foregroundColor(Color(red: 0.937, green: 0.043, blue: 0.161))
                 }
                 .padding(.trailing)
             }
@@ -127,15 +128,85 @@ struct ChatScreen: View {
                     }
                 }
                 .onEnded { value in
-                    if value.translation.width > 100 {  // Define un umbral para ejecutar la acción
-                        presentationMode.wrappedValue.dismiss()  // Vuelve a la pantalla anterior
+                    if value.translation.width > 100 {
+                        presentationMode.wrappedValue.dismiss()
                     }
-                    dragOffset = 0  // Restablece el desplazamiento
+                    dragOffset = 0
                 }
         )
     }
+    
+    // Función para enviar el mensaje a la API de OpenAI
+    func sendMessageToGPT(message: String) {
+        // Asegúrate de almacenar tu API Key de forma segura
+        let apiKey = "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"
+        
+        let endpoint = "https://api.openai.com/v1/chat/completions"
+        let headers = [
+            "Content-Type": "application/json",
+            "Authorization": "Bearer \(apiKey)"
+        ]
+        
+        // Historial de mensajes para mantener el contexto
+        var messagesPayload: [[String: String]] = [
+            ["role": "system", "content": "Eres un asistente virtual llamado Maya., te sentrarás en temas de finanzas, te daré mis transacciones para que me puedas dar detalles de mis movimientos y me darás recomedaciones basandote en mi información de manera exclusiva \(transactions)"]
+        ]
+        
+        // Agregar los mensajes anteriores
+        for msg in messages {
+            let role = msg.isUser ? "user" : "assistant"
+            messagesPayload.append(["role": role, "content": msg.text])
+        }
+        
+        let parameters: [String: Any] = [
+            "model": "gpt-3.5-turbo",
+            "messages": messagesPayload
+        ]
+        
+        guard let url = URL(string: endpoint) else { return }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.allHTTPHeaderFields = headers
+        request.httpBody = try? JSONSerialization.data(withJSONObject: parameters)
+        
+        let session = URLSession.shared
+        let task = session.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error al realizar la solicitud: \(error)")
+                return
+            }
+            
+            guard let data = data else {
+                print("No se recibieron datos de la API.")
+                return
+            }
+            
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let choices = json["choices"] as? [[String: Any]],
+                   let firstChoice = choices.first,
+                   let messageDict = firstChoice["message"] as? [String: Any],
+                   let content = messageDict["content"] as? String {
+                    
+                    DispatchQueue.main.async {
+                        let botMessage = Message(text: content.trimmingCharacters(in: .whitespacesAndNewlines), isUser: false)
+                        messages.append(botMessage)
+                    }
+                } else {
+                    print("No se pudo analizar la respuesta de la API.")
+                }
+            } catch {
+                print("Error al decodificar la respuesta: \(error)")
+            }
+        }
+        task.resume()
+    }
 }
 
-#Preview {
-    ChatScreen()
+// Estructura para representar un mensaje
+struct Message: Identifiable {
+    let id = UUID()
+    let text: String
+    let isUser: Bool
 }
+

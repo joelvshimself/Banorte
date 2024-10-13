@@ -21,7 +21,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         
         // Opcional: Log de saldo inicial
         
-        
         return true
     }
 

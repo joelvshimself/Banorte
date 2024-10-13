@@ -11,6 +11,7 @@ import SwiftUI
 struct BanorteApp: App {
     // Vincula el AppDelegate con SwiftUI
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @StateObject var transactionsManager = TransactionsManager()
 
     var body: some Scene {
         WindowGroup {

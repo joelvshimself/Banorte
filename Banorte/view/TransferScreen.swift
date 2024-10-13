@@ -2,6 +2,8 @@ import SwiftUI
 import MultipeerConnectivity
 
 struct TransferScreen: View {
+    let transactions: [Transaction]  // Recibe las transacciones
+    @Environment(\.presentationMode) var presentationMode  // Para manejar la acción de regresar
     @State private var amount: String = ""
     @ObservedObject var connectivityHandler = ConnectivityHandler()
     
@@ -9,7 +11,7 @@ struct TransferScreen: View {
     @State private var receivedAmount: String = ""
 
     var body: some View {
-        NavigationView {  // Envolver en NavigationView si aún no lo está
+        NavigationView {
             VStack {
                 // Barra superior con imagen de fondo
                 ZStack {
@@ -30,13 +32,9 @@ struct TransferScreen: View {
                         .foregroundColor(.black)
                         .padding()
 
-                    // Campo de destinatario (rellenado automáticamente con el dispositivo conectado)
+                    // Campo de destinatario
                     HStack {
-                        Text("Destinatario:")
-                            .font(.headline)
-                            .foregroundColor(.black)
                         Spacer()
-                        // Mostrar el nombre del peer conectado
                         HStack {
                             // Círculo estilizado para el destinatario
                             ZStack {
@@ -65,19 +63,25 @@ struct TransferScreen: View {
                         Text("Monto:")
                             .font(.headline)
                             .foregroundColor(.black)
-                        Spacer()
                         TextField("Monto a transferir", text: $amount)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .keyboardType(.decimalPad)
                             .frame(width: 200)
                     }
+                    .frame(maxWidth: .infinity, alignment: .center) // Centrar el HStack
                     .padding(.horizontal, 20)
 
                     // Botón de confirmar transferencia
                     Button(action: {
-                        // Enviar la cantidad a través de la conectividad
-                        connectivityHandler.sendMessage(amount)
-                        print("Transferencia realizada a \(connectivityHandler.connectedPeerName) por \(amount)")
+                        // Validar que el monto sea un número válido
+                        if let monto = Double(amount), monto > 0 {
+                            // Enviar la cantidad a través de la conectividad
+                            connectivityHandler.sendMessage(amount)
+                            print("Transferencia realizada a \(connectivityHandler.connectedPeerName) por \(amount)")
+                        } else {
+                            // Manejar entrada inválida
+                            print("Monto inválido")
+                        }
                     }) {
                         Text("Confirmar transferencia")
                             .font(.headline)
@@ -88,6 +92,8 @@ struct TransferScreen: View {
                             .cornerRadius(10)
                     }
                     .padding(.top, 20)
+                    .padding(.bottom, 20) // Agregado padding inferior
+
                 }
                 .background(Color.white)
                 .cornerRadius(10)
@@ -96,25 +102,29 @@ struct TransferScreen: View {
 
                 Spacer()
 
-                // Barra inferior de navegación con color #EF0B29
+                // Barra inferior de navegación
                 HStack {
-                    
-                    NavigationLink(destination: Home()) {
+                    // Botón "Home" como botón de regresar
+                    Button(action: {
+                        presentationMode.wrappedValue.dismiss()  // Acción de regresar
+                    }) {
                         NavigationButton(imageName: "house.fill", label: "Home")
                     }
+                    
                     Spacer()
-                    // Navigation Button Maya actualizado con NavigationLink a ChatScreen
-                    NavigationLink(destination: ChatScreen()) {
+                    
+                    NavigationLink(destination: ChatScreen(transactions: transactions)) {
                         NavigationButton(imageName: "bolt.fill", label: "Maya")
                     }
                     
                     Spacer()
                     
-                    NavigationLink(destination: TransferScreen()) {
+                    NavigationLink(destination: TransferScreen(transactions: transactions)) {
                         NavigationButton(imageName: "arrow.left.arrow.right", label: "Transferir")
                     }
 
                     Spacer()
+                    
                     NavigationLink(destination: Services()) {
                         NavigationButton(imageName: "rectangle.stack", label: "Servicios")
                     }
@@ -147,22 +157,24 @@ struct TransferScreen: View {
                 }
             }
         }
-        .navigationBarBackButtonHidden(true)  // Esto oculta el botón "Back"
+        .navigationBarBackButtonHidden(true)
         .navigationBarTitleDisplayMode(.inline)
     }
-}
 
-// TransferNavigationButton es un componente reutilizable para los botones de la barra de navegación inferior
-struct TransferNavigationButton: View {
-    var imageName: String
-    var label: String
+    // Componente reutilizable para los botones de la barra de navegación inferior
+    struct NavigationButton: View {  // Renombrado a NavigationButton para consistencia
+        var imageName: String
+        var label: String
 
-    var body: some View {
-        VStack {
-            Image(systemName: imageName)
-                .font(.title)
-            Text(label)
-                .font(.footnote)
+        var body: some View {
+            VStack {
+                Image(systemName: imageName)
+                    .font(.title)
+                Text(label)
+                    .font(.footnote)
+            }
         }
     }
 }
+
+
