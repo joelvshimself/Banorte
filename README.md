@@ -20,23 +20,13 @@ Este proyecto es una aplicación móvil desarrollada en Swift utilizando SwiftUI
 - `BanorteTests/`
 - `BanorteUITests/`
 
-## Instalación
+## Idea desarrollada por:
 
-```bash
-git clone https://github.com/tu_usuario/Banorte.git
-cd Banorte
-open Banorte.xcodeproj
-Uso
+- Bruno Ramírez
 
-Navegar por las pantallas de la aplicación.
-Asegúrate de estar autenticado en Firebase.
-Licencia
 
-MIT
-Contacto
 
-email@ejemplo.com
-r
-Copiar código
-
-Este es un README simplificado y enfocado solo en el código Markdown.
+## Código desarrollado por:
+- Fabrizio Martinez
+- Roger Rendon
+- Joel Vargas
